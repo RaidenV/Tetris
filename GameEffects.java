@@ -130,4 +130,10 @@ public class GameEffects implements GameEventListener
     {
         playSound( mGameOver );
     }
+
+    @Override
+    public void gameStart()
+    {
+        
+    }
 }

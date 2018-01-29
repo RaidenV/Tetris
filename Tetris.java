@@ -29,7 +29,7 @@ import javax.swing.Timer;
  *
  * @author raidenv
  */
-public class Tetris extends JFrame
+public class Tetris extends JFrame implements GameEventListener
 {
 
     private JPanel mContent;
@@ -115,14 +115,37 @@ public class Tetris extends JFrame
         mGameEffects.setTwoRowEffect("src/tetris/Resources/effects/excelent.wav");
         mGameEffects.setThreeRowEffect("src/tetris/Resources/effects/outstand.wav");
         mGameEffects.setFourRowEffect("src/tetris/Resources/effects/toasty.wav");
+        mGameEffects.setGameOverEffect("src/tetris/Resources/effects/gameover.wav");
 
         mGameLogic.addListener(mGameEffects);
+        mGameLogic.addListener(this);
+        mGameLogic.addListener(mGamePanel);
     }
 
     private void resetGame()
     {
         mConPan.setScore(0);
         mGameLogic.reset();
+    }
+
+    @Override
+    public void rowComplete( int num )
+    {
+    }
+
+    @Override
+    public void gameOver()
+    {
+        mGameMusic.stopBg();
+        mConPan.setStartButton("Start");
+        mGameTimer.stop();
+        mGameMusic.stopBg();
+    }
+
+    @Override
+    public void gameStart()
+    {
+
     }
 
     public class ControlPanel extends JPanel
@@ -201,6 +224,11 @@ public class Tetris extends JFrame
             mScoreBoard.setText(Integer.toString(s));
         }
 
+        public void setStartButton( String str )
+        {
+            mStartStop.setText(str);
+        }
+
         public void setNextPiece( int[][] b )
         {
             mNextPiece.setBoard(b);
@@ -228,6 +256,7 @@ public class Tetris extends JFrame
                     jb.setText("Stop");
                     mGameTimer.start();
                     mGameMusic.startBg();
+                    mGameLogic.reset();
                     break;
                 }
                 case "Stop":
@@ -240,6 +269,7 @@ public class Tetris extends JFrame
                 }
                 case "Reset":
                     resetGame();
+                    mConPan.setStartButton("Start");
                     mGamePanel.setBoard(mGameLogic.getBoard());
                     mGamePanel.repaint();
                     mGameTimer.stop();
@@ -286,36 +316,36 @@ public class Tetris extends JFrame
         public void keyPressed( KeyEvent e )
         {
 
-                if ( e.getKeyCode() == KeyEvent.VK_RIGHT )
-                {
-                    mGameLogic.moveRight();
-                }
+            if ( e.getKeyCode() == KeyEvent.VK_RIGHT )
+            {
+                mGameLogic.moveRight();
+            }
 
-                if ( e.getKeyCode() == KeyEvent.VK_LEFT )
-                {
-                    mGameLogic.moveLeft();
-                }
+            if ( e.getKeyCode() == KeyEvent.VK_LEFT )
+            {
+                mGameLogic.moveLeft();
+            }
 
-                if ( e.getKeyCode() == KeyEvent.VK_UP )
-                {
-                    mGameLogic.rotateRight();
-                }
+            if ( e.getKeyCode() == KeyEvent.VK_UP )
+            {
+                mGameLogic.rotateRight();
+            }
 
-                if ( e.getKeyCode() == KeyEvent.VK_Z )
-                {
-                    mGameLogic.rotateLeft();
-                }
+            if ( e.getKeyCode() == KeyEvent.VK_Z )
+            {
+                mGameLogic.rotateLeft();
+            }
 
-                if ( e.getKeyCode() == KeyEvent.VK_DOWN )
-                {
-                    mGameLogic.moveDown();
-                }
+            if ( e.getKeyCode() == KeyEvent.VK_DOWN )
+            {
+                mGameLogic.moveDown();
+            }
 
-                if ( e.getKeyCode() == KeyEvent.VK_C )
-                {
-                    mGameLogic.dropPiece();
-                }
-            
+            if ( e.getKeyCode() == KeyEvent.VK_C )
+            {
+                mGameLogic.dropPiece();
+            }
+
         }
 
         @Override

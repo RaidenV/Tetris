@@ -138,6 +138,7 @@ public class GameLogic
             placePiece();
 
             mRunning = true;
+            gameStart();
         }
 
         else
@@ -154,7 +155,7 @@ public class GameLogic
             }
             else if ( !canMove )
             {
-                System.out.println("GAME OVER");
+                gameOver();
             }
             else
             {
@@ -196,6 +197,14 @@ public class GameLogic
         {
             rowComplete(rowsComplete);
         }
+    }
+    
+    public void gameStart()
+    {
+        mListeners.forEach((g) ->
+        {
+            g.gameStart();
+        });
     }
 
     public void rowComplete( int num )

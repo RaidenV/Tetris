@@ -12,5 +12,6 @@ package tetris;
 public interface GameEventListener
 {
     void rowComplete( int num );
+    void gameStart();
     void gameOver();
 }

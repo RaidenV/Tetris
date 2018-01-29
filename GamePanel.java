@@ -6,6 +6,7 @@
 package tetris;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import javax.swing.JPanel;
 import java.awt.Graphics2D;
@@ -19,10 +20,11 @@ import java.awt.Rectangle;
  * Time: 6:53:13 PM
  *
  *========================*/
-public class GamePanel extends JPanel
+public class GamePanel extends JPanel implements GameEventListener
 {    
     private final int mBoardSizeX;
     private final int mBoardSizeY;
+    private boolean mGameOver;
     private int mBoard[][];
 
     public GamePanel( int x, int y )
@@ -30,6 +32,7 @@ public class GamePanel extends JPanel
         super();
         mBoardSizeX = x;
         mBoardSizeY = y;
+        mGameOver = false;
         init();
     }
 
@@ -52,16 +55,32 @@ public class GamePanel extends JPanel
         {
             Graphics2D g2d = ( Graphics2D ) g;
             drawBoard(g2d);
+            
+            if ( mGameOver )
+            {
+                drawText( g2d, "Game Over" );
+            }
         }
+    }
+    
+    public void drawText( Graphics2D g2d, String str )
+    {
+        Rectangle rect = getBounds();
+        Point p        = getLocation();
+        int midptX     = rect.width  / 2 -  10 * str.length();
+        int midptY     = rect.height / 2;
+        
+        g2d.setFont( new Font( "Courier New", 1, 36 ) );
+        g2d.setColor( Color.WHITE );
+        g2d.drawString( str, midptX, midptY );
     }
 
     public void drawBoard( Graphics2D g2d )
     {
 
-        Rectangle rect = this.getBounds();
-        Point p = this.getLocation();
-        int relSzX = rect.width / mBoardSizeX;
-        int relSzY = rect.height / mBoardSizeY;
+        Rectangle rect = getBounds();
+        int relSzX     = rect.width  / mBoardSizeX;
+        int relSzY     = rect.height / mBoardSizeY;
         int curX = 0;
         int curY = 0;
         
@@ -110,8 +129,27 @@ public class GamePanel extends JPanel
                 break;
         }
         
-        g2d.fillRect( x+1, y+1, wd-2, ht-2 );
-        g2d.drawRect( x+1, y+1, wd-2, ht-2 );       
+      //  g2d.fillRect( x+1, y+1, wd-2, ht-2 );
+        g2d.fillRoundRect(x+1, y+1, wd-2, ht-2, 5, 5);
+        //g2d.drawRect( x+1, y+1, wd-2, ht-2 );       
+    }
+
+    @Override
+    public void rowComplete( int num )
+    {
+        
+    }
+
+    @Override
+    public void gameOver()
+    {
+        mGameOver = true;
+    }
+
+    @Override
+    public void gameStart()
+    {
+        mGameOver = false;
     }
 
 }

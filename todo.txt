@@ -1,0 +1,17 @@
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+                                     T O D O
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+1/28/18
+1.	Refactor all classes, most importantly:
+	- Tetris
+	- GamePanel
+
+	These two classes fell by the wayside during development as focus was
+	on the game logic.  They are admittedly abominations.
+
+2.	Add/Edit comments for better coherency.
+
+3.	Add levels (this goes hand-in-hand with refactoring somewhat as the
+	current construct does not allow for consolidated start/stop and
+	event management. #learning java.
