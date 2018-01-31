@@ -197,16 +197,13 @@ public class GamePanel extends JPanel implements GameEventListener, GameLevelLis
         mTitleTimer = new Timer( TITLE_TIME, new TimeListener() );
         mTitleTimer.start();
         mLvlComplete = true;
-        System.out.println( "Here" );
     }
     
     public class TimeListener implements ActionListener
     {
         @Override
         public void actionPerformed( ActionEvent e )
-        {
-            
-            System.out.println( "But never here" );
+        {        
             mLvlComplete = false;
             mTitleTimer.stop();
             mListeners.forEach((g) ->

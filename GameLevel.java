@@ -17,7 +17,7 @@ public class GameLevel implements GameEventListener
 
     private final int DEFAULT_LEVEL = 0;
     private final int DEFAULT_DIFF  = 25;
-    private final int DEFAULT_TARGET = 1000;
+    private final int DEFAULT_TARGET = 10000;
     private final int DIFF_INC = 1;
     private final int TAR_INC = 5000;
     
