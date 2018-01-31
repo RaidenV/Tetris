@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tetris;
 
+import tetris.Listeners.GameEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,25 +25,38 @@ public class GameLogic
         RIGHT, LEFT, DOWN, ROTL, ROTR
     };
 
+    // Board size values;
     private static final int BOARD_SZ_X = 10;
     private static final int BOARD_SZ_Y = 30;
+    // Definition of X and Y for clarity;
     private static final int X = 0;
     private static final int Y = 1;
+    // Number of unique pieces;
     private static final int UNIQUE_PCS = 7;
+    // Number of sections of a piece;
     private static final int PIECE_SZ = 4;
+    // Spawn locations for a piece;
     private static final int SPAWN_X = ( BOARD_SZ_X / 2 ) - 1;
     private static final int SPAWN_Y = 0;
+    // Score added when a piece advances (moves down) one square;
     private static final int ADVANCE_SCORE = 10;
+    // Score added when a row is complete;
     private static final int ROW_SCORE = 200;
+    // True if a new piece was just added to the board;
     private static boolean mNewPieceAdded = false;
-    private static boolean mDropping = false;
+    // Holds all observers;
     private final List<GameEventListener> mListeners = new ArrayList<>();
+    // Random variable;
     private final Random mRan;
 
+    // Current board;
     private final int[][] mBoard;
+    // Current score;
     private int mScore;
+    // Pieces;
     private Piece mCurPiece;
     private Piece mNextPiece;
+    // True if the game is running;
     private boolean mRunning;
 
     public GameLogic()
@@ -56,6 +65,13 @@ public class GameLogic
         mRan = new Random();
     }
 
+    /*=========================================================================
+    Name        addListener
+    
+    Purpose     Adds a listener for game events.
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public void addListener( GameEventListener newListener )
     {
         mListeners.add(newListener);
@@ -73,6 +89,22 @@ public class GameLogic
         return mBoard;
     }
 
+    /*=========================================================================
+    Name        getNextPiece
+    
+    Purpose     Returns a board of size[szx][szy] where in the piece will be
+                placed.
+    
+    Inputs      szx     -   X dimension of the area upon which the piece will be
+                            placed
+                szy     -   Y dimension of the area upon which the piece will be
+                            placed
+    
+    Returns     int[][] -   Board of size[szx][szy] with piece placed in the
+                            center
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public int[][] getNextPiece( int szx, int szy )
     {
         int[][] pieceBoard = new int[szx][szy];
@@ -90,11 +122,25 @@ public class GameLogic
         return pieceBoard;
     }
 
+    /*=========================================================================
+    Name        getScore
+    
+    Purpose     Returns the current score.
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public int getScore()
     {
         return mScore;
     }
     
+    /*=========================================================================
+    Name        isRunning
+    
+    Purpose     Returns whether the board is running or not
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public boolean isRunning()
     {
         return mRunning;
@@ -146,7 +192,6 @@ public class GameLogic
             boolean canMove = moveDown();
             if ( !canMove && !mNewPieceAdded )
             {
-                System.out.println("Here");
                 mCurPiece = mNextPiece;
                 checkBoard();
                 placePiece();               
@@ -164,6 +209,13 @@ public class GameLogic
         }
     }
 
+    /*=========================================================================
+    Name        checkBoard
+    
+    Purpose     Checks the board for completed rows.
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     private void checkBoard()
     {
         int rowsComplete = 0;
@@ -199,6 +251,13 @@ public class GameLogic
         }
     }
     
+    /*=========================================================================
+    Name        gameStart
+    
+    Purpose     Game start event
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public void gameStart()
     {
         mListeners.forEach((g) ->
@@ -207,6 +266,15 @@ public class GameLogic
         });
     }
 
+    /*=========================================================================
+    Name        rowComplete
+    
+    Purpose     Row complete event
+    
+    Input       num     -   Number of rows completed
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public void rowComplete( int num )
     {
         mListeners.forEach((g) ->
@@ -215,6 +283,13 @@ public class GameLogic
         });
     }
 
+    /*=========================================================================
+    Name        gameOver
+    
+    Purpose     Game over event
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public void gameOver()
     {
         mListeners.forEach((g) ->
@@ -223,6 +298,13 @@ public class GameLogic
         });
     }
 
+    /*=========================================================================
+    Name        dropPiece
+    
+    Purpose     Drops a piece
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public void dropPiece()
     {
         if ( !mNewPieceAdded )
@@ -231,9 +313,22 @@ public class GameLogic
             }
      }
 
+    
+    /*
+     * The following movement functions were employed to add a layer of 
+     * abstraction.  This way, if a move has some alternate effect, that
+     * effect can be called outside of the agnostic move function.
+     */
+    /*=========================================================================
+    Name        moveDown
+    
+    Purpose     Moves a piece down one step
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public boolean moveDown()
     {
-        boolean moved = move(Dir.DOWN );
+        boolean moved = move( Dir.DOWN );
         
         if ( moved )
             mScore += ADVANCE_SCORE;
@@ -265,16 +360,41 @@ public class GameLogic
         move(Dir.LEFT);
     }
 
+    /*=========================================================================
+    Name        rotateRight
+    
+    Purpose     Rotate a piece 90 degrees to the right.
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public void rotateRight()
     {
         move(Dir.ROTR);
     }
 
+    /*=========================================================================
+    Name        rotateLeft
+    
+    Purpose     Rotate a piece 90 degrees to the left.
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     public void rotateLeft()
     {
         move(Dir.ROTL);
     }
 
+    /*=========================================================================
+    Name        move
+    
+    Purpose     Move a piece in the given direction/rotation.
+    
+    Inputs      d       -   direction to move a piece
+    
+    Returns     boolean -   True if able to move, false if not
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     private boolean move( Dir d )
     {
         if ( mRunning )
@@ -293,7 +413,6 @@ public class GameLogic
             {
                 if ( getBoardVal(p, check[i]) != 0 )
                 {
-                    System.out.println("Returning false, Collision");
                     return false;
                 }
             }
@@ -455,14 +574,23 @@ public class GameLogic
                 break;
             default:
                 np = new LnPiece(s);
-//                System.out.println(Arrays.toString(
-//                    Thread.currentThread().getStackTrace()));
                 break;
         }
 
         return np;
     }
 
+    /*=========================================================================
+    Name        checkBounds
+    
+    Purpose     Checks the location of a piece against the board boundaries.
+                 
+    Inputs      p       -   locations to check
+    
+    Return      boolean -   True if able to move, false if not
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
     private boolean checkBounds( int[][] p )
     {
         for ( int i = 0; i < PIECE_SZ; ++i )

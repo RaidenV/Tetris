@@ -1,10 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tetris;
 
+import tetris.Listeners.GameEventListener;
+import tetris.Listeners.GameLevelListener;
+import tetris.Listeners.GamePanelListener;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -12,6 +10,11 @@ import javax.swing.JPanel;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import javax.swing.Timer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /*========================
  *
@@ -20,12 +23,17 @@ import java.awt.Rectangle;
  * Time: 6:53:13 PM
  *
  *========================*/
-public class GamePanel extends JPanel implements GameEventListener
+public class GamePanel extends JPanel implements GameEventListener, GameLevelListener
 {    
     private final int mBoardSizeX;
     private final int mBoardSizeY;
     private boolean mGameOver;
+    private boolean mLvlComplete;
+    private Timer mTitleTimer;
+    private final int TITLE_TIME = 3000;
+    private List<GamePanelListener> mListeners = new ArrayList<>();
     private int mBoard[][];
+    private int mLvl = 0;
 
     public GamePanel( int x, int y )
     {
@@ -33,6 +41,7 @@ public class GamePanel extends JPanel implements GameEventListener
         mBoardSizeX = x;
         mBoardSizeY = y;
         mGameOver = false;
+        mLvlComplete = false;
         init();
     }
 
@@ -45,6 +54,18 @@ public class GamePanel extends JPanel implements GameEventListener
     public void setBoard( int b[][] )
     {
         this.mBoard = b;
+    }
+    
+    /*=========================================================================
+    Name        addListener
+    
+    Purpose     Adds a listener for game events.
+    
+    History     25 Jan 18   AFB     Created
+    ==========================================================================*/
+    public void addListener( GamePanelListener newListener )
+    {
+        mListeners.add( newListener );
     }
 
     @Override
@@ -60,6 +81,11 @@ public class GamePanel extends JPanel implements GameEventListener
             {
                 drawText( g2d, "Game Over" );
             }
+            
+            if ( mLvlComplete )
+            {
+                drawLvlComp( g2d, mLvl );
+            }
         }
     }
     
@@ -70,9 +96,23 @@ public class GamePanel extends JPanel implements GameEventListener
         int midptX     = rect.width  / 2 -  10 * str.length();
         int midptY     = rect.height / 2;
         
-        g2d.setFont( new Font( "Courier New", 1, 36 ) );
+        g2d.setFont( new Font( "Courier New", Font.BOLD, 36 ) );
         g2d.setColor( Color.WHITE );
         g2d.drawString( str, midptX, midptY );
+    }
+    
+    public void drawLvlComp( Graphics2D g2d, int lvl )
+    {
+        Rectangle rect = getBounds();
+        Point p        = getLocation();
+        int midptX     = rect.width  / 2;
+        int midptY     = rect.height / 2;
+        
+        g2d.setFont( new Font( "Courier New", Font.BOLD, 36 ) );
+        g2d.setColor( Color.WHITE );
+        g2d.drawString( "Level", midptX - 47 , midptY - 35 );
+        g2d.drawString( Integer.toString( lvl ), midptX, midptY );
+        g2d.drawString( "Complete", midptX - 77, midptY + 35 );
     }
 
     public void drawBoard( Graphics2D g2d )
@@ -129,9 +169,7 @@ public class GamePanel extends JPanel implements GameEventListener
                 break;
         }
         
-      //  g2d.fillRect( x+1, y+1, wd-2, ht-2 );
-        g2d.fillRoundRect(x+1, y+1, wd-2, ht-2, 5, 5);
-        //g2d.drawRect( x+1, y+1, wd-2, ht-2 );       
+        g2d.fillRoundRect(x+1, y+1, wd-2, ht-2, 5, 5);       
     }
 
     @Override
@@ -150,6 +188,32 @@ public class GamePanel extends JPanel implements GameEventListener
     public void gameStart()
     {
         mGameOver = false;
+    }
+
+    @Override
+    public void levelComplete( int lvl )
+    {
+        mLvl = lvl;
+        mTitleTimer = new Timer( TITLE_TIME, new TimeListener() );
+        mTitleTimer.start();
+        mLvlComplete = true;
+        System.out.println( "Here" );
+    }
+    
+    public class TimeListener implements ActionListener
+    {
+        @Override
+        public void actionPerformed( ActionEvent e )
+        {
+            
+            System.out.println( "But never here" );
+            mLvlComplete = false;
+            mTitleTimer.stop();
+            mListeners.forEach((g) ->
+            {
+                g.titleComplete( );
+            });
+        }
     }
 
 }

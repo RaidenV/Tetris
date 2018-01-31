@@ -1,5 +1,7 @@
 package tetris;
 
+import tetris.Listeners.GameEventListener;
+import tetris.Listeners.GameLevelListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * Time: 7:50:21 PM
  *
  *========================*/
-public class GameMusic
+public class GameMusic implements GameEventListener, GameLevelListener
 {
     ArrayList<String> mSongs;
     AudioInputStream mAudStream;
@@ -30,14 +32,13 @@ public class GameMusic
 
     public GameMusic()
     {
+        mRan = new Random();
         loadLib();
         init();
     }
 
     private void init( )
-    {
-        mRan = new Random();
-        
+    {       
         try
         {
             File audioFile = new File(getRanFile());
@@ -59,9 +60,7 @@ public class GameMusic
         catch ( LineUnavailableException e )
         {
             System.out.println("LineUnavailableException");
-        }
-        
-        
+        }             
     }
     
     private void loadLib()
@@ -101,5 +100,30 @@ public class GameMusic
     public void resetBg()
     {
         init();
+    }
+
+    @Override
+    public void rowComplete( int num )
+    {
+        
+    }
+
+    @Override
+    public void gameStart()
+    {
+        init();
+        startBg();
+    }
+
+    @Override
+    public void gameOver()
+    {
+        stopBg();
+    }
+
+    @Override
+    public void levelComplete( int lvl )
+    {
+       stopBg();
     }
 }

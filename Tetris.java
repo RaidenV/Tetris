@@ -1,14 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tetris;
 
+import tetris.Listeners.GameEventListener;
+import tetris.Listeners.GameLevelListener;
+import tetris.Listeners.GamePanelListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -25,21 +24,22 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
-/**
- *
- * @author raidenv
- */
-public class Tetris extends JFrame implements GameEventListener
+
+public class Tetris extends JFrame implements GameEventListener, 
+    GameLevelListener, GamePanelListener
 {
 
+    private final int DEFAULT_TIC = 15;
+    
     private JPanel mContent;
     private GamePanel mGamePanel;
     private GameLogic mGameLogic;
     private GameMusic mGameMusic;
+    private GameLevel mGameLevel;
     private GameEffects mGameEffects;
     private Timer mGameTimer;
     private ControlPanel mConPan;
-    private final int PIECE_DIV = 150;
+    private int mDifficulty = 200;
     private int mCurTic;
 
     public static void main( String[] args )
@@ -81,51 +81,75 @@ public class Tetris extends JFrame implements GameEventListener
         ImageIcon img = new ImageIcon("src/tetris/Resources/icons/logo.png");
         this.setIconImage(img.getImage());
 
-        mContent = new JPanel();
-        mContent.setBackground(new Color(13, 24, 30));
-        mContent.setLayout(new BorderLayout(10, 10));
-        setContentPane(mContent);
-
         mGameLogic = new GameLogic();
-        mGameTimer = new Timer(1, new TimerListener());
+        mGameTimer = new Timer( DEFAULT_TIC, new TimerListener());
 
-        mGamePanel = new GamePanel(mGameLogic.getBoardX(),
-                                   mGameLogic.getBoardY());
-        mGamePanel.addKeyListener(new KeyBoardListener());
-        mGamePanel.setVisible(true);
-
+        configContent();
+        configGamePan();
         loadSoundFx();
-
-        mConPan = new ControlPanel();
-        mConPan.setVisible(true);
-        mContent.add(mConPan, BorderLayout.EAST);
-
-        mContent.add(mGamePanel, BorderLayout.CENTER);
+        configConPan();
+        configGameLvl();
+        configListeners();
 
         this.setFocusable(true);
         this.addKeyListener(new KeyBoardListener());
     }
 
+    private void configContent()
+    {
+        mContent = new JPanel();
+        mContent.setBackground(new Color(13, 24, 30));
+        mContent.setLayout(new BorderLayout(10, 10));
+        setContentPane(mContent);
+    }
+
+    private void configConPan()
+    {
+        mConPan = new ControlPanel();
+        mConPan.setVisible(true);
+        mContent.add(mConPan, BorderLayout.EAST);
+    }
+
+    private void configGamePan()
+    {
+        mGamePanel = new GamePanel(mGameLogic.getBoardX(),
+                                   mGameLogic.getBoardY());
+        mGamePanel.addKeyListener(new KeyBoardListener());
+        mGamePanel.setVisible(true);
+        mContent.add(mGamePanel, BorderLayout.CENTER);
+    }
+    
+    private void configGameLvl()
+    {
+        mGameLevel = new GameLevel();
+        mDifficulty = mGameLevel.getDifficulty();
+        mCurTic = mDifficulty;
+    }
+
     private void loadSoundFx()
     {
         mGameMusic = new GameMusic();
-
         mGameEffects = new GameEffects();
-        mGameEffects.setRowEffect("src/tetris/Resources/effects/scoreloud.wav");
-        mGameEffects.setTwoRowEffect("src/tetris/Resources/effects/excelent.wav");
-        mGameEffects.setThreeRowEffect("src/tetris/Resources/effects/outstand.wav");
-        mGameEffects.setFourRowEffect("src/tetris/Resources/effects/toasty.wav");
-        mGameEffects.setGameOverEffect("src/tetris/Resources/effects/gameover.wav");
-
+    }
+    
+    private void configListeners()
+    {
+        mGameLevel.addListener( this );
+        mGameLevel.addListener( mGamePanel );
+        mGameLevel.addListener( mGameEffects );
+        mGameLevel.addListener( mGameMusic );
+        
+        mGameLogic.addListener(mGameMusic);
         mGameLogic.addListener(mGameEffects);
         mGameLogic.addListener(this);
         mGameLogic.addListener(mGamePanel);
+        mGamePanel.addListener(this);
     }
 
     private void resetGame()
     {
-        mConPan.setScore(0);
-        mGameLogic.reset();
+        gameOver();
+        mConPan.setScore( 0 );
     }
 
     @Override
@@ -140,12 +164,31 @@ public class Tetris extends JFrame implements GameEventListener
         mConPan.setStartButton("Start");
         mGameTimer.stop();
         mGameMusic.stopBg();
+        mGameLevel.reset();
+        mGameLogic.reset();
     }
 
     @Override
     public void gameStart()
     {
+        mConPan.disableBtns( false );
+    }
 
+    @Override
+    public void levelComplete( int lvl )
+    {
+        mGameTimer.stop();
+        mGameLevel.increaseLevel();
+        mDifficulty = mGameLevel.getDifficulty();
+        mConPan.disableBtns( true );
+    }
+
+    @Override
+    public void titleComplete()
+    {
+        mGameLogic.reset();
+        mGameMusic.stopBg();
+        mGameTimer.start();
     }
 
     public class ControlPanel extends JPanel
@@ -240,6 +283,12 @@ public class Tetris extends JFrame implements GameEventListener
         {
             return NEXT_PCE_SZ;
         }
+
+        private void disableBtns( boolean b )
+        {
+            mStartStop.setEnabled( !b );
+            mReset.setEnabled( !b );
+        }
     }
 
     public class ButtonListener implements ActionListener
@@ -255,8 +304,6 @@ public class Tetris extends JFrame implements GameEventListener
                     JButton jb = ( JButton ) ( e.getSource() );
                     jb.setText("Stop");
                     mGameTimer.start();
-                    mGameMusic.startBg();
-                    mGameLogic.reset();
                     break;
                 }
                 case "Stop":
@@ -273,8 +320,7 @@ public class Tetris extends JFrame implements GameEventListener
                     mGamePanel.setBoard(mGameLogic.getBoard());
                     mGamePanel.repaint();
                     mGameTimer.stop();
-                    mGameMusic.stopBg();
-                    mGameMusic.resetBg();
+                    mGameLogic.reset();
                     break;
                 default:
                     break;
@@ -289,9 +335,10 @@ public class Tetris extends JFrame implements GameEventListener
         public void actionPerformed( ActionEvent e )
         {
             mCurTic++;
-            if ( mCurTic == PIECE_DIV )
+            if ( mCurTic >= mDifficulty )
             {
                 mGameLogic.update();
+                mGameLevel.checkLevel( mGameLogic.getScore() );
                 int sz = mConPan.getNextPieceSz();
                 mConPan.setNextPiece(mGameLogic.getNextPiece(sz, sz));
                 mConPan.setScore(mGameLogic.getScore());
