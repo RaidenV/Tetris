@@ -28,7 +28,7 @@ public class GameMusic implements GameEventListener, GameLevelListener
     Clip mAudClip;
     Random mRan;
     
-    private final String mLibFolder= "src/tetris/Resources/music/";
+    private final String MUSIC_FOLDER_NAME= "music";
 
     public GameMusic()
     {
@@ -63,20 +63,36 @@ public class GameMusic implements GameEventListener, GameLevelListener
         }             
     }
     
+    // Recursively search all subfolders for appropriate files
+    private void searchFolder( String foldername, ArrayList<File> filelist )
+    {
+        File folder = new File( foldername );
+        if ( folder.listFiles().length == 0 )
+            return;
+        
+        File[] files = folder.listFiles();
+        for( File file : files )
+        {
+            if ( foldername.endsWith(MUSIC_FOLDER_NAME) )
+            {
+                if ( file.getName().endsWith(".wav") )
+                    filelist.add( file );
+            }
+            if ( file.isDirectory() )
+                searchFolder( file.getAbsolutePath(), filelist );
+        }
+    }
+    
     private void loadLib()
     {
-        File lib = new File( mLibFolder );
-        
-        File[] files = lib.listFiles();
+        ArrayList<File> flist = new ArrayList<>();
+        searchFolder( System.getProperty( "user.dir" ), flist );
         
         mSongs = new ArrayList<>();
         
-        for ( int i = 0; i < files.length; ++i )
+        for ( int i = 0; i < flist.size(); ++i )
         {
-            if ( files[i].isFile() )
-            {
-                mSongs.add( files[i].getAbsolutePath() );
-            }
+            mSongs.add( flist.get(i).getAbsolutePath() );
         }   
     }
     

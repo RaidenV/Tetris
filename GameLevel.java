@@ -33,7 +33,6 @@ public class GameLevel implements GameEventListener
 
     public int getDifficulty()
     {
-        System.out.println( mDifficulty );
         return mDifficulty;
     }
 

@@ -12,6 +12,14 @@
 
 2.	Add/Edit comments for better coherency.
 
-3.	Add levels (this goes hand-in-hand with refactoring somewhat as the
-	current construct does not allow for consolidated start/stop and
-	event management. #learning java.
+//3.	Add levels (this goes hand-in-hand with refactoring somewhat as the
+//	current construct does not allow for consolidated start/stop and
+//	event management. #learning java.
+
+1/30/18
+4.      Refactoring still needs to happen...  I feel like I've been too weary
+        after work and that I am failing to understand how to structurally
+        reorganize this mess.
+
+5.      Clean up all classes
+        -  Group all public/private functions

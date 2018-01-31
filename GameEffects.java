@@ -68,15 +68,8 @@ public class GameEffects implements GameEventListener, GameLevelListener
     {
 
        ArrayList<File> fnames = new ArrayList<>();
-       // File folder = new File( System.getProperty( "user.dir" ) );
        searchFolder( System.getProperty( "user.dir" ), fnames );
        
-       for ( int i = 0; i < fnames.size(); ++i )
-       {
-           System.out.println( fnames.get(i) );
-       }
-
-
         for ( File file : fnames )
         {
             switch ( file.getName() )
